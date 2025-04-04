@@ -4,7 +4,7 @@ const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const VIETTEL_TOKEN = process.env.VIETTEL_TOKEN; // nhớ cấu hình token trong Render Dashboard
+const VIETTEL_TOKEN = process.env.VIETTEL_TOKEN;
 
 app.use(cors({
   origin: '*',
@@ -21,30 +21,41 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// ✅ GET Tỉnh
+// ✅ Get Provinces
 app.get("/api/listProvince", async (req, res) => {
-  const response = await fetch("https://partner.viettelpost.vn/v2/categories/listProvince", {
-    headers: {
-      "Token": VIETTEL_TOKEN
-    }
-  });
-  const data = await response.json();
-  res.json(data);
+  try {
+    const response = await fetch("https://partner.viettelpost.vn/v2/categories/listProvince", {
+      headers: {
+        "Token": VIETTEL_TOKEN
+      }
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Lỗi listProvince:", err);
+    res.status(502).json({ error: "Viettel lỗi", message: err.message });
+  }
 });
 
-// ✅ GET Quận
+// ✅ Get Districts
 app.get("/api/listDistrict", async (req, res) => {
   const { provinceId } = req.query;
-  const response = await fetch(`https://partner.viettelpost.vn/v2/categories/listDistrict?provinceId=${provinceId}`, {
-    headers: {
-      "Token": VIETTEL_TOKEN
-    }
-  });
-  const data = await response.json();
-  res.json(data);
+
+  try {
+    const response = await fetch(`https://partner.viettelpost.vn/v2/categories/listDistrict?provinceId=${provinceId}`, {
+      headers: {
+        "Token": VIETTEL_TOKEN
+      }
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("❌ Lỗi listDistrict:", err);
+    res.status(502).json({ error: "Viettel lỗi", message: err.message });
+  }
 });
 
-// ✅ POST Phường
+// ✅ Post Ward (phường)
 app.post("/api/listWard", async (req, res) => {
   const { districtId } = req.body;
 
@@ -53,8 +64,6 @@ app.post("/api/listWard", async (req, res) => {
   }
 
   try {
-    console.log("📦 Gửi lên Viettel với districtId:", districtId);
-
     const response = await fetch("https://partner.viettelpost.vn/v2/categories/listWard", {
       method: "POST",
       headers: {
@@ -64,17 +73,14 @@ app.post("/api/listWard", async (req, res) => {
       body: JSON.stringify({ districtId })
     });
 
-    const text = await response.text();
-    console.log("📥 Response từ Viettel:", text);
-
-    const json = JSON.parse(text);
-    res.json(json);
+    const data = await response.json();
+    res.json(data);
   } catch (err) {
-    console.error("❌ Lỗi gọi listWard:", err);
-    res.status(502).json({ error: "Lỗi gọi Viettel", message: err.message });
+    console.error("❌ Lỗi listWard:", err);
+    res.status(502).json({ error: "Viettel lỗi", message: err.message });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ Proxy server running on port ${PORT}`);
 });
