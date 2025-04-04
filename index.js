@@ -6,7 +6,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const VIETTEL_TOKEN = process.env.VIETTEL_TOKEN;
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Token"]
+}));
+
 app.use(express.json());
 
 app.get("/api/listProvince", async (req, res) => {
