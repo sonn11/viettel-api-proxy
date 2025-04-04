@@ -44,18 +44,24 @@ app.post("/api/listWard", async (req, res) => {
     return res.status(400).json({ error: "Thiếu districtId" });
   }
 
-  const response = await fetch("https://partner.viettelpost.vn/v2/categories/listWard", {
-    method: "POST",
-    headers: {
-      "Token": VIETTEL_TOKEN,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ districtId })
-  });
+  try {
+    const response = await fetch("https://partner.viettelpost.vn/v2/categories/listWard", {
+      method: "POST",
+      headers: {
+        "Token": VIETTEL_TOKEN,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ districtId })
+    });
 
-  const data = await response.json();
-  res.json(data);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("Lỗi khi gọi listWard:", err);
+    res.status(502).json({ error: "Viettel không phản hồi đúng", message: err.message });
+  }
 });
+
 
 
 app.listen(PORT, () => {
